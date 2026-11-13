@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#075e54">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<title>Leave Notifier</title>
+<style>
+:root{box-sizing:border-box;--bg:#eef2f1;--card:#fff;--tx:#14211f;--mu:#6a7a77;--bd:#e1e8e6;--ac:#128c7e;--ac2:#fff;--bub:#dcf8c6;--chip:#f1f5f4;--hd:#075e54}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1210;--card:#16201e;--tx:#e6f0ee;--mu:#8fa39f;--bd:#26332f;--ac:#25d366;--ac2:#04210f;--bub:#025144;--chip:#1e2a27;--hd:#0b2b27}}
+:root[data-theme="dark"]{--bg:#0b1210;--card:#16201e;--tx:#e6f0ee;--mu:#8fa39f;--bd:#26332f;--ac:#25d366;--ac2:#04210f;--bub:#025144;--chip:#1e2a27;--hd:#0b2b27}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;max-width:560px;margin-inline:auto}
+header{background:var(--hd);color:#fff;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 12px;display:flex;align-items:center;gap:10px;flex:none}
+header h1{font-size:18px;margin:0;flex:1}
+.stack span{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#fff;font-size:14px;margin-left:-6px;border:2px solid var(--hd)}
+main{flex:1;overflow-y:auto;padding:14px 14px 20px}
+nav{flex:none;display:flex;background:var(--card);border-top:1px solid var(--bd);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
+nav button{flex:1;border:0;background:transparent;color:var(--mu);font:inherit;font-size:11px;padding:4px 0;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button i{font-style:normal;font-size:20px}
+nav button.on{color:var(--ac);font-weight:700}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:12px}
+h2{font-size:15px;margin:0 0 10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{border-radius:14px;padding:12px;color:#fff}
+.stat b{font-size:26px;display:block;line-height:1.1}
+.av{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:21px;flex:none}
+.row{display:flex;align-items:center;gap:10px}
+.mu{color:var(--mu);font-size:12px}
+label{display:block;font-size:12px;font-weight:600;color:var(--mu);margin:12px 0 5px}
+select,input,textarea{width:100%;padding:11px;border:1px solid var(--bd);border-radius:12px;background:var(--chip);color:var(--tx);font:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--bd);background:var(--chip);color:var(--tx);padding:7px 12px;border-radius:999px;font:inherit;font-size:13px}
+.chip.on{background:var(--ac);color:var(--ac2);border-color:var(--ac);font-weight:600}
+button{font:inherit;cursor:pointer}
+.go{width:100%;margin-top:14px;padding:14px;border:0;border-radius:14px;background:var(--ac);color:var(--ac2);font-weight:700}
+.sm{border:1px solid var(--bd);background:var(--chip);color:var(--tx);border-radius:10px;padding:6px 10px;font-size:12px;font-weight:600}
+.sm.ok{color:#1a9e55}.sm.no{color:#d33}
+.tag{display:inline-block;border-radius:8px;padding:1px 8px;font-size:11px;font-weight:700}
+.Pending{background:#fff3cd;color:#8a6d00}.Approved{background:#d4f5e0;color:#157a42}.Rejected{background:#fde0e0;color:#b32020}
+.li{padding:12px 0;border-top:1px solid var(--bd)}
+.li:first-child{border-top:0}
+.acts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.fab{position:fixed;right:max(16px,calc(50% - 264px));bottom:calc(76px + env(safe-area-inset-bottom,0px));width:54px;height:54px;border-radius:50%;border:0;background:var(--ac);color:var(--ac2);font-size:26px;box-shadow:0 6px 16px rgba(0,0,0,.3)}
+#sheetBg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center;z-index:30}
+#sheet{background:var(--card);width:100%;max-width:560px;border-radius:22px 22px 0 0;padding:16px 14px calc(16px + env(safe-area-inset-bottom,0px));max-height:88%;overflow-y:auto}
+.bub{background:var(--bub);border-radius:14px 14px 14px 4px;padding:10px 12px;font-size:13px;white-space:pre-wrap;margin:8px 0}
+.wa{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--bd);border-radius:14px;margin-top:8px;text-decoration:none;color:var(--tx)}
+.wa .av{width:38px;height:38px;font-size:19px}
+.wa .s{margin-left:auto;background:var(--ac);color:var(--ac2);padding:8px 14px;border-radius:999px;font-weight:700;font-size:13px}
+.wa.done{opacity:.55}
+#toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#111;color:#fff;padding:9px 16px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:40}
+.err{color:#d33;font-size:13px;margin-top:8px}
+#alarm{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:50;padding:20px}
+.al{background:var(--card);border-radius:22px;padding:22px;width:100%;max-width:360px;text-align:center}
+.bell{font-size:54px;display:inline-block;animation:rg .4s infinite alternate}
+@keyframes rg{from{transform:rotate(-18deg)}to{transform:rotate(18deg)}}
+</style>
+</head>
+<body>
+<header><h1>🏖️ Leave Notifier</h1><div class="stack" id="stack"></div></header>
+<main id="main"></main>
+<nav id="nav"></nav>
+<button class="fab" data-act="tab" data-v="apply" id="fab">＋</button>
+<div id="sheetBg"><div id="sheet"></div></div>
+<div id="alarm"></div>
+<div id="toast"></div>
+
+<script>
+var M=[
+ {id:1,n:"Prasad",i:"🚢",c:"linear-gradient(135deg,#a8d0ff,#2f80ed)"},
+ {id:2,n:"Manga Raju",i:"⚓",c:"linear-gradient(135deg,#a7f3e6,#14b8a6)"},
+ {id:3,n:"Kiran",i:"🛠️",c:"linear-gradient(135deg,#ffd9a8,#f2994a)"},
+ {id:4,n:"Patrudu",i:"🧭",c:"linear-gradient(135deg,#e1c4ff,#9b51e0)"},
+ {id:5,n:"Sekhar",i:"🏗️",c:"linear-gradient(135deg,#b9f0c8,#27ae60)"}];
+var TY=["Casual Leave","Sick Leave","Earned Leave","Half Day","Other"];
+var NAV=[["home","🏠","Home"],["apply","➕","Apply"],["log","📋","Log"],["team","👥","Team"],["more","⚙️","More"]];
+var tab="home",flt=0,cur=null,err="";
+function td(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
+var today=td();
+var form={who:1,type:TY[0],from:today,to:today,reason:""};
+var ph={},logs=[];
+var set={on:true,time:"08:00"},fired={},snz=0,alarmList=[];
+try{ph=JSON.parse(localStorage.getItem("la_ph")||"{}");logs=JSON.parse(localStorage.getItem("la_logs")||"[]");set=JSON.parse(localStorage.getItem("la_set")||'{"on":true,"time":"08:00"}');fired=JSON.parse(localStorage.getItem("la_fired")||"{}")}catch(e){}
+function save(){try{localStorage.setItem("la_set",JSON.stringify(set));localStorage.setItem("la_fired",JSON.stringify(fired));localStorage.setItem("la_ph",JSON.stringify(ph));localStorage.setItem("la_logs",JSON.stringify(logs))}catch(e){}}
+function $(i){return document.getElementById(i)}
+function mem(id){return M.filter(function(m){return m.id==id})[0]}
+function cp(p){return (p||"").replace(/\D/g,"")}
+function fmt(d){var p=d.split("-");return p[2]+"-"+p[1]+"-"+p[0]}
+function dd(a,b){return Math.round((new Date(b)-new Date(a))/864e5)+1}
+function now(){return new Date().toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"})}
+function av(m,s){return '<div class="av" style="background:'+m.c+(s?";width:"+s+"px;height:"+s+"px":"")+'">'+m.i+'</div>'}
+function toast(t){var d=$("toast");d.textContent=t;d.style.opacity=1;clearTimeout(toast.t);toast.t=setTimeout(function(){d.style.opacity=0},2200)}
+function copy(t,m){try{navigator.clipboard.writeText(t).then(function(){toast(m)},function(){toast("Copy not allowed here")})}catch(e){toast("Copy not allowed here")}}
+function msg(l){
+  var m=mem(l.who),d=l.days===1?"1 day":l.days+" days";
+  if(l.status==="Approved"||l.status==="Rejected"){
+    return (l.status==="Approved"?"✅ *Leave Approved*":"❌ *Leave Rejected*")+"\n👤 "+m.i+" "+m.n+"\n📌 "+l.type+"\n📅 "+fmt(l.from)+" to "+fmt(l.to)+" ("+d+")";
+  }
+  return "🔔 *Leave Alert*\n👤 "+m.i+" "+m.n+" has applied for leave\n📌 Type: "+l.type+"\n📅 "+fmt(l.from)+" to "+fmt(l.to)+" ("+d+")\n📝 Reason: "+(l.reason||"-")+"\n🕒 Applied: "+l.at;
+}
+function link(m,t){return "https://wa.me/"+cp(ph[m.id])+"?text="+encodeURIComponent(t)}
+function sheet(t,title,only){
+  cur={t:t,only:only};
+  var list=M.filter(function(m){return !only||m.id===only});
+  $("sheet").innerHTML='<h2>'+title+'</h2><div class="bub">'+t.replace(/\*/g,"")+'</div>'+
+  list.map(function(m){
+    var ok=cp(ph[m.id]).length>=10;
+    return '<a class="wa" '+(ok?'href="'+link(m,t)+'" target="_blank" rel="noopener" data-act="done"':'data-act="nonum" data-id="'+m.id+'"')+'>'+av(m)+'<div><b>'+m.n+'</b><div class="mu">'+(ok?"+"+cp(ph[m.id]):"Add number in Team tab")+'</div></div><span class="s">Send</span></a>';
+  }).join("")+
+  (list.length>1?'<button class="go" data-act="openall">Open all chats</button>':"")+
+  '<div class="row" style="margin-top:10px"><button class="sm" data-act="copymsg">📋 Copy</button><button class="sm" data-act="sharemsg">📤 Share</button><button class="sm" data-act="close" style="margin-left:auto">Close</button></div>';
+  $("sheetBg").style.display="flex";
+}
+function home(){
+  var c={Pending:0,Approved:0,Rejected:0};logs.forEach(function(l){c[l.status]++});
+  var on=logs.filter(function(l){return l.status!=="Rejected"&&l.from<=today&&l.to>=today});
+  var rec=logs.slice(-3).reverse();
+  return '<div class="grid" style="margin-bottom:12px">'+
+  '<div class="stat" style="background:#2f80ed"><b>'+logs.length+'</b>Total</div>'+
+  '<div class="stat" style="background:#e0a800"><b>'+c.Pending+'</b>Pending</div>'+
+  '<div class="stat" style="background:#1a9e55"><b>'+c.Approved+'</b>Approved</div>'+
+  '<div class="stat" style="background:#d33"><b>'+c.Rejected+'</b>Rejected</div></div>'+
+  '<div class="card"><h2>🌴 On leave today <span class="mu" style="font-weight:400">· 🔔 '+(set.on?"alarm "+set.time:"alarm off")+'</span></h2>'+(on.length?on.map(function(l){var m=mem(l.who);return '<div class="row" style="margin-bottom:6px">'+av(m,34)+'<b>'+m.n+'</b><span class="mu">'+l.type+'</span></div>'}).join(""):'<div class="mu">Everyone is available today.</div>')+'</div>'+
+  '<div class="card"><h2>🕘 Recent</h2>'+(rec.length?rec.map(item).join(""):'<div class="mu">No leave applied yet. Tap ＋ to start.</div>')+'</div>';
+}
+function item(l,full){
+  var m=mem(l.who);
+  return '<div class="li"><div class="row">'+av(m,38)+'<div style="flex:1"><b>'+m.n+'</b> <span class="tag '+l.status+'">'+l.status+'</span><div class="mu">'+l.type+' · '+fmt(l.from)+' → '+fmt(l.to)+' · '+l.days+'d</div></div></div>'+(l.reason?'<div style="margin-top:6px;font-size:13px">'+l.reason+'</div>':"")+
+  (full?'<div class="acts"><button class="sm ok" data-act="st" data-id="'+l.id+'" data-s="Approved">✔ Approve</button><button class="sm no" data-act="st" data-id="'+l.id+'" data-s="Rejected">✖ Reject</button><button class="sm" data-act="resend" data-id="'+l.id+'">🔁 Resend</button><button class="sm" data-act="del" data-id="'+l.id+'">🗑️</button><a class="sm" target="_blank" rel="noopener" href="'+calLink(l)+'" style="text-decoration:none">📅 Phone alarm</a></div>':"")+'</div>';
+}
+function apply(){
+  return '<div class="card"><h2>📝 Apply for leave</h2><label>Employee</label><select id="who">'+M.map(function(m){return '<option value="'+m.id+'"'+(m.id==form.who?" selected":"")+'>'+m.i+' '+m.n+'</option>'}).join("")+'</select>'+
+  '<label>Leave type</label><div class="chips">'+TY.map(function(t){return '<button class="chip'+(t===form.type?" on":"")+'" data-act="type" data-v="'+t+'">'+t+'</button>'}).join("")+'</div>'+
+  '<div class="grid"><div><label>From</label><input type="date" id="from" value="'+form.from+'"></div><div><label>To</label><input type="date" id="to" value="'+form.to+'"></div></div>'+
+  '<label>Reason</label><textarea id="reason" rows="3" placeholder="Reason for leave">'+form.reason+'</textarea><div class="err">'+err+'</div><button class="go" data-act="submit">Submit &amp; notify all 5</button></div>';
+}
+function logv(){
+  var L=logs.filter(function(l){return !flt||l.who==flt}).slice().reverse();
+  return '<div class="chips" style="margin-bottom:12px"><button class="chip'+(!flt?" on":"")+'" data-act="flt" data-id="0">All</button>'+M.map(function(m){return '<button class="chip'+(flt==m.id?" on":"")+'" data-act="flt" data-id="'+m.id+'">'+m.i+' '+m.n+'</button>'}).join("")+'</div>'+
+  '<div class="card">'+(L.length?L.map(function(l){return item(l,1)}).join(""):'<div class="mu">No records.</div>')+'</div>';
+}
+function team(){
+  return '<div class="card"><h2>👥 Team WhatsApp numbers</h2><div class="mu" style="margin-bottom:6px">Use country code, e.g. 919876543210</div>'+M.map(function(m){
+    return '<div class="li row">'+av(m,44)+'<div style="flex:1"><b>'+m.n+'</b><input data-ph="'+m.id+'" inputmode="tel" placeholder="91XXXXXXXXXX" value="'+(ph[m.id]||"")+'" style="margin-top:4px;padding:8px"></div><button class="sm" data-act="test" data-id="'+m.id+'">🧪 Test</button></div>';
+  }).join("")+'<button class="go" data-act="testall">🧪 Send test to all 5</button></div>';
+}
+function more(){
+  return '<div class="card"><h2>🔔 Leave-day alarm</h2><div class="row" style="margin-bottom:10px"><b style="flex:1">Alarm on leave days</b><button class="chip'+(set.on?" on":"")+'" data-act="altoggle">'+(set.on?"On":"Off")+'</button></div><label>Alarm time</label><input type="time" id="altime" value="'+set.time+'"><div class="mu" style="margin:8px 0">Rings on the day each employee is on leave. It works while the app is open. For reminders when the app is closed, tap 📅 Phone alarm on a leave in the Log.</div><div class="grid"><button class="sm" data-act="notifperm" style="padding:12px">🔔 Allow notifications ('+(("Notification" in window)?Notification.permission:"n/a")+')</button><button class="sm" data-act="altest" style="padding:12px">▶ Test alarm</button></div></div>'+'<div class="card"><h2>⚙️ Tools</h2><div class="grid"><button class="sm" data-act="csv" style="padding:12px">📊 Copy log (CSV)</button><button class="sm" data-act="share" style="padding:12px">📤 Share this app</button><button class="sm no" data-act="clog" style="padding:12px">🗑️ Clear log</button><button class="sm no" data-act="cnum" style="padding:12px">♻️ Clear numbers</button></div></div>'+
+  '<div class="card"><h2>📲 Install as app</h2><div style="font-size:13px"><p><b>Android (Chrome):</b> ⋮ menu → Add to Home screen / Install app.</p><p><b>iPhone (Safari):</b> Share → Add to Home Screen.</p><p><b>Computer:</b> Chrome/Edge address bar → install icon.</p></div></div>';
+}
+function render(){
+  $("stack").innerHTML=M.map(function(m){return "<span>"+m.i+"</span>"}).join("");
+  $("nav").innerHTML=NAV.map(function(x){return '<button class="'+(tab===x[0]?"on":"")+'" data-act="tab" data-v="'+x[0]+'"><i>'+x[1]+'</i>'+x[2]+'</button>'}).join("");
+  $("fab").style.display=(tab==="home"||tab==="log")?"block":"none";
+  $("main").innerHTML={home:home,apply:apply,log:logv,team:team,more:more}[tab]();
+  $("main").scrollTop=0;
+}
+function submit(){
+  err="";
+  if(!form.from||!form.to)err="Please choose From and To dates.";
+  else if(form.to<form.from)err="To date cannot be before From date.";
+  if(err){render();return}
+  var l={id:Date.now(),who:+form.who,type:form.type,from:form.from,to:form.to,days:dd(form.from,form.to),reason:form.reason.trim(),status:"Pending",at:now()};
+  logs.push(l);save();form.reason="";tab="log";flt=0;render();sheet(msg(l),"Send leave alert");
+}
+function csv(){
+  if(!logs.length){toast("Log is empty");return}
+  var r=["Name,Type,From,To,Days,Status,Reason,Applied"].concat(logs.map(function(l){return [mem(l.who).n,l.type,l.from,l.to,l.days,l.status,'"'+(l.reason||"").replace(/"/g,'""')+'"','"'+l.at+'"'].join(",")}));
+  copy(r.join("\n"),"CSV copied — paste into Excel");
+}
+function find(id){return logs.filter(function(l){return l.id==id})[0]}
+function testMsg(){return "🧪 *Test message*\nLeave Notifier is working ✅\n🕒 "+now()}
+var A={
+ tab:function(e){tab=e.dataset.v;render()},
+ type:function(e){form.type=e.dataset.v;render()},
+ submit:submit,
+ flt:function(e){flt=+e.dataset.id;render()},
+ st:function(e){var l=find(e.dataset.id);l.status=e.dataset.s;save();render();sheet(msg(l),"Notify: "+l.status)},
+ resend:function(e){var l=find(e.dataset.id);sheet(msg(l),"Resend alert")},
+ del:function(e){if(confirm("Delete this record?")){logs=logs.filter(function(l){return l.id!=e.dataset.id});save();render()}},
+ test:function(e){sheet(testMsg(),"Test message",+e.dataset.id)},
+ testall:function(){sheet(testMsg(),"Test message")},
+ done:function(e){e.classList.add("done")},
+ nonum:function(e){toast("Add "+mem(e.dataset.id).n+"’s number in Team tab")},
+ openall:function(){M.forEach(function(m,i){if(cp(ph[m.id]).length>=10)setTimeout(function(){window.open(link(m,cur.t),"_blank")},i*700)})},
+ copymsg:function(){copy(cur.t,"Message copied")},
+ sharemsg:function(){if(navigator.share)navigator.share({text:cur.t}).catch(function(){});else copy(cur.t,"Message copied")},
+ close:function(){$("sheetBg").style.display="none"},
+ altoggle:function(){set.on=!set.on;save();render()},
+ notifperm:function(){if(!("Notification" in window)){toast("Not supported on this browser");return}Notification.requestPermission().then(function(){render()})},
+ altest:function(){var l=todayLeaves();ring(l.length?l:[{id:0,who:1,type:"Test alarm",to:today}],true)},
+ aldis:function(){$("alarm").style.display="none"},
+ alsnz:function(){snz=Date.now()+600000;alarmList.forEach(function(l){delete fired[l.id+"|"+today]});save();$("alarm").style.display="none";toast("Snoozed for 10 minutes")},
+ alwa:function(){$("alarm").style.display="none";var t="🌴 *Leave Today* — "+fmt(today)+"\n"+alarmList.map(function(l){var m=mem(l.who);return m.i+" "+m.n+" — "+l.type+" (till "+fmt(l.to)+")"}).join("\n");sheet(t,"Notify team: leave today")},
+ csv:csv,
+ share:function(){var t="Leave Notifier app: "+location.href;if(navigator.share)navigator.share({title:"Leave Notifier",text:t}).catch(function(){});else copy(t,"Link copied")},
+ clog:function(){if(confirm("Delete all leave records?")){logs=[];save();render()}},
+ cnum:function(){if(confirm("Clear all saved numbers?")){ph={};save();render()}}
+};
+document.addEventListener("click",function(ev){
+  if(ev.target.id==="sheetBg"){A.close();return}
+  var e=ev.target.closest("[data-act]");
+  if(e&&A[e.dataset.act])A[e.dataset.act](e);
+});
+document.addEventListener("input",function(ev){
+  var t=ev.target;
+  if(t.dataset&&t.dataset.ph){ph[t.dataset.ph]=t.value;save();return}
+  if(t.id==="altime"){set.time=t.value;snz=0;save();return}
+  if(t.id==="who")form.who=t.value;
+  else if(t.id==="from"||t.id==="to"||t.id==="reason")form[t.id]=t.value;
+});
+function todayLeaves(){return logs.filter(function(l){return l.status!=="Rejected"&&l.from<=today&&l.to>=today})}
+function calLink(l){var m=mem(l.who),e=new Date(l.to+"T00:00:00Z");e.setUTCDate(e.getUTCDate()+1);var f=function(s){return s.replace(/-/g,"")};
+return "https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent("🏖️ "+m.n+" on leave")+"&dates="+f(l.from)+"/"+f(e.toISOString().slice(0,10))+"&details="+encodeURIComponent(l.type+(l.reason?" - "+l.reason:""))}
+var ac;
+function beep(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();var n=0;(function b(){if(n++>=8)return;var o=ac.createOscillator(),g=ac.createGain();o.frequency.value=n%2?880:660;g.gain.value=.3;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.3);setTimeout(b,450)})()}catch(e){}}
+function ring(list,test){
+  alarmList=list;
+  var t=list.map(function(l){var m=mem(l.who);return m.i+" "+m.n+" — "+l.type+" (till "+fmt(l.to)+")"}).join("\n");
+  $("alarm").innerHTML='<div class="al"><div class="bell">🔔</div><h2 style="margin-top:6px">Leave today</h2><div style="white-space:pre-wrap;margin:8px 0 14px">'+t+'</div><button class="go" data-act="alwa" style="margin-top:0">Notify team on WhatsApp</button><div class="row" style="margin-top:10px"><button class="sm" data-act="alsnz" style="flex:1;padding:10px">⏰ Snooze 10 min</button><button class="sm" data-act="aldis" style="flex:1;padding:10px">Dismiss</button></div></div>';
+  $("alarm").style.display="flex";
+  beep();try{if(navigator.vibrate)navigator.vibrate([400,200,400,200,400])}catch(e){}
+  try{if("Notification" in window&&Notification.permission==="granted")new Notification("🔔 Leave today",{body:t})}catch(e){}
+  if(!test){list.forEach(function(l){fired[l.id+"|"+today]=1});save()}
+}
+function check(){
+  var n=new Date();today=td();
+  if(!set.on||Date.now()<snz)return;
+  var hm=("0"+n.getHours()).slice(-2)+":"+("0"+n.getMinutes()).slice(-2);
+  if(hm<set.time)return;
+  var due=todayLeaves().filter(function(l){return !fired[l.id+"|"+today]});
+  if(due.length)ring(due);
+}
+if("serviceWorker" in navigator&&location.protocol.indexOf("http")===0){navigator.serviceWorker.register("sw.js").catch(function(){})}
+render();
+check();setInterval(check,30000);
+document.addEventListener("visibilitychange",function(){if(!document.hidden)check()});
+</script>
+</body>
+</html>
